@@ -20,7 +20,9 @@ class TapPostgres(SQLTap):
             "sqlalchemy_url",
             th.StringType,
             required=True,
-            description="Example postgresql://postgres:postgres@localhost:5432/postgres",
+            description=(
+                "Example postgresql://postgres:postgres@localhost:5432/postgres"
+            ),
         ),
     ).to_dict()
 
