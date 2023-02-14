@@ -1,8 +1,8 @@
 {
   "streams": [
     {
-      "tap_stream_id": "public-test_replication_key",
-      "table_name": "test_replication_key",
+      "tap_stream_id": "public-test_full_table",
+      "table_name": "test_full_table",
       "replication_method": "FULL_TABLE",
       "replication_key": "updated_at",
       "key_properties": ["id"],
@@ -23,7 +23,7 @@
         "required": ["id", "updated_at"]
       },
       "is_view": false,
-      "stream": "public-test_replication_key",
+      "stream": "public-test_full_table",
       "metadata": [
         {
           "breadcrumb": ["properties", "id"],

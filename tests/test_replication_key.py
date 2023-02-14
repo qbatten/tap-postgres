@@ -6,16 +6,8 @@ import sqlalchemy
 from faker import Faker
 from sqlalchemy import Column, DateTime, Integer, MetaData, String, Table
 
-TABLE_NAME = "test_replication_key"
-SAMPLE_CONFIG = {
-    "start_date": pendulum.datetime(2022, 11, 1).to_iso8601_string(),
-    "sqlalchemy_url": "postgresql://postgres:postgres@localhost:5432/postgres",
-}
 
-
-def setup_test_table(
-    table_name=TABLE_NAME, sqlalchemy_url=SAMPLE_CONFIG["sqlalchemy_url"]
-):
+def setup_test_table(table_name, sqlalchemy_url):
     """setup any state specific to the execution of the given module."""
     engine = sqlalchemy.create_engine(sqlalchemy_url)
     fake = Faker()
@@ -40,9 +32,7 @@ def setup_test_table(
             conn.execute(insert)
 
 
-def teardown_test_table(
-    table_name=TABLE_NAME, sqlalchemy_url=SAMPLE_CONFIG["sqlalchemy_url"]
-):
+def teardown_test_table(table_name, sqlalchemy_url):
     engine = sqlalchemy.create_engine(sqlalchemy_url)
     with engine.connect() as conn:
         conn.execute(f"DROP TABLE {table_name}")
