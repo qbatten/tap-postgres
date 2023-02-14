@@ -24,6 +24,8 @@ class TapPostgres(SQLTap):
                 "Example postgresql://postgres:postgres@localhost:5432/postgres"
             ),
         ),
+        th.Property("stream_maps", th.ObjectType(), required=False),
+        th.Property("stream_map_config", th.ObjectType(), required=False),
     ).to_dict()
 
     @cached_property

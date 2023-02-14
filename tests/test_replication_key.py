@@ -29,23 +29,28 @@ def setup_test_table(table_name, sqlalchemy_url):
         table_name,
         metadata_obj,
         Column("id", Integer, primary_key=True),
-        Column("updated_at", DateTime(), nullable=False),
+        Column("updated_at", DateTime(), nullable=True),
+        # Column("created_at", DateTime(), nullable=False),
         Column("name", String()),
     )
     with engine.connect() as conn:
         metadata_obj.create_all(conn)
         conn.execute(f"TRUNCATE TABLE {table_name}")
+        import random
         for _ in range(1000):
             insert = test_replication_key_table.insert().values(
-                updated_at=fake.date_between(date1, date2), name=fake.name()
+                updated_at=fake.date_between(date1, date2),
+                # updated_at=fake.date_between(date1, date2) if random.randint(0,9) > 5 else sqlalchemy.sql.null(),
+                # created_at=fake.date_between(date1, date2),
+                 name=fake.name()
             )
             conn.execute(insert)
 
 
 def teardown_test_table(table_name, sqlalchemy_url):
     engine = sqlalchemy.create_engine(sqlalchemy_url)
-    with engine.connect() as conn:
-        conn.execute(f"DROP TABLE {table_name}")
+    # with engine.connect() as conn:
+    #     conn.execute(f"DROP TABLE {table_name}")
 
 
 def replication_key_test(tap, table_name):
