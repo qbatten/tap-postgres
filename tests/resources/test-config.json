@@ -1,0 +1,4 @@
+{
+  "sqlalchemy_url": "postgresql://postgres:postgres@localhost:5432/postgres",
+  "start_date": "2022-11-01T00:00:00+00:00"
+}

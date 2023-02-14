@@ -148,6 +148,9 @@ class PostgresStream(SQLStream):
 
     connector_class = PostgresConnector
 
+    def is_sorted(self) -> bool:
+        return bool(self.replication_key)
+
     def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
 
@@ -179,11 +182,13 @@ class PostgresStream(SQLStream):
         query = table.select()
         if self.replication_key:
             replication_key_col = table.columns[self.replication_key]
+
+            replication_key_value = self.get_starting_replication_key_value(context)
+            if replication_key_value:
+                query = query.where(replication_key_col >= replication_key_value)
+
             query = query.order_by(replication_key_col)
 
-            start_val = self.get_starting_replication_key_value(context)
-            if start_val:
-                query = query.filter(replication_key_col >= start_val)
-
+        query_text = str(query.compile(compile_kwargs={"literal_binds": True}))
         for row in self.connector.connection.execute(query):
             yield dict(row)

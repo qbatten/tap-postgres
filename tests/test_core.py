@@ -1,40 +1,78 @@
 import pendulum
 import pytest
-from singer_sdk.testing import get_tap_test_class, suites
-from singer_sdk.testing.templates import TapTestTemplate
-from test_replication_key import (
-    TABLE_NAME,
-    TapTestReplicationKey,
-    setup_test_table,
-    teardown_test_table,
-)
+from singer_sdk.testing import get_tap_test_class
+from singer_sdk.testing.suites import TestSuite
+from singer_sdk.testing.templates import StreamTestTemplate
 
 from tap_postgres.tap import TapPostgres
 
-SAMPLE_CONFIG = {
-    "start_date": pendulum.datetime(2022, 11, 1).to_iso8601_string(),
-    "sqlalchemy_url": "postgresql://postgres:postgres@localhost:5432/postgres",
-}
+from .test_replication_key import setup_test_table, teardown_test_table
 
-custom_test_replication_key = suites.TestSuite(
-    kind="tap", tests=[TapTestReplicationKey]
-)
+SQLALCHEMY_URL = "postgresql://postgres:postgres@localhost:5432/postgres"
 
-TapPostgresTest = get_tap_test_class(
+TapPostgresTests = get_tap_test_class(
     tap_class=TapPostgres,
-    config=SAMPLE_CONFIG,
-    catalog="tests/resources/data.json",
-    custom_suites=[custom_test_replication_key],
+    config="tests/resources/test-config.json",
+    catalog="tests/resources/test-catalog-full-table.json",
 )
 
 
-class TestTapPostgres(TapPostgresTest):
-
-    table_name = TABLE_NAME
-    sqlalchemy_url = SAMPLE_CONFIG["sqlalchemy_url"]
+class TestTapPostgres(TapPostgresTests):
+    """Standard Tap Tests."""
 
     @pytest.fixture(scope="class")
     def resource(self):
-        setup_test_table(self.table_name, self.sqlalchemy_url)
+        setup_test_table(table_name="test_full_table", sqlalchemy_url=SQLALCHEMY_URL)
         yield
-        teardown_test_table(self.table_name, self.sqlalchemy_url)
+        teardown_test_table(table_name="test_full_table", sqlalchemy_url=SQLALCHEMY_URL)
+
+
+class StreamReplicationKeyTest(StreamTestTemplate):
+    name = "replication_key"
+
+    def test(self):
+        if self.stream.replication_key:
+            # test that data starts from bookmark
+            bookmark_value = self.stream.stream_state.get("replication_key_value")
+            starting_bookmark_dt = pendulum.parse(bookmark_value)
+            first_record_updated_at_dt = pendulum.parse(
+                self.stream_records[0]["updated_at"]
+            )
+            assert first_record_updated_at_dt >= starting_bookmark_dt
+
+            # test that final STATE message writes correct bookmark
+            new_bookmark = self.runner.state_messages[-1]["value"]["bookmarks"][
+                "public-test_replication_key"
+            ]["replication_key_value"]
+            new_bookmark_dt = pendulum.parse(new_bookmark)
+            last_record_updated_at = self.stream_records[-1]["updated_at"]
+            assert new_bookmark == last_record_updated_at
+            assert new_bookmark_dt <= pendulum.parse(
+                "2022-11-30T00:00:00+00:00"
+            )  # last possible record updated_at in fake data
+
+
+custom_suite = TestSuite(kind="tap_stream", tests=[StreamReplicationKeyTest])
+
+
+TapPostgresIncremental = get_tap_test_class(
+    tap_class=TapPostgres,
+    config="tests/resources/test-config.json",
+    catalog="tests/resources/test-catalog-incremental.json",
+    state="tests/resources/test-state-incremental.json",
+    custom_suites=[custom_suite],
+)
+
+
+class TestTapPostgresIncremental(TapPostgresIncremental):
+    """Incremental Test."""
+
+    @pytest.fixture(scope="class")
+    def resource(self):
+        setup_test_table(
+            table_name="test_replication_key", sqlalchemy_url=SQLALCHEMY_URL
+        )
+        yield
+        teardown_test_table(
+            table_name="test_replication_key", sqlalchemy_url=SQLALCHEMY_URL
+        )

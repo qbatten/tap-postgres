@@ -1376,11 +1376,9 @@ version = "0.20.0"
 description = "A framework for building Singer taps"
 category = "main"
 optional = false
-python-versions = ">=3.7.1,<3.12"
-files = [
-    {file = "singer_sdk-0.20.0-py3-none-any.whl", hash = "sha256:7c1fe33a2de5aad771a739961c0f8be93c18bd7eba31363eaa70ed8f4000b851"},
-    {file = "singer_sdk-0.20.0.tar.gz", hash = "sha256:5871f5f691136bf00d2e4527f17f9b69b9ea1b9b62bd5984f5d350be8650548d"},
-]
+python-versions = "<3.12,>=3.7.1"
+files = []
+develop = true
 
 [package.dependencies]
 backoff = ">=2.0.0,<3.0"
@@ -1393,10 +1391,10 @@ joblib = ">=1.0.1,<2.0.0"
 jsonpath-ng = ">=1.5.3,<2.0.0"
 jsonschema = ">=4.16.0,<5.0.0"
 memoization = ">=0.3.2,<0.5.0"
-pendulum = ">=2.1.0,<3.0.0"
-PyJWT = ">=2.4,<3.0"
-pytest = {version = ">=7.2.1,<8.0.0", optional = true, markers = "extra == \"testing\""}
-pytest-durations = {version = ">=1.2.0,<2.0.0", optional = true, markers = "extra == \"testing\""}
+pendulum = "^2.1.0"
+PyJWT = "~=2.4"
+pytest = {version = "^7.2.1", optional = true}
+pytest-durations = {version = "^1.2.0", optional = true}
 python-dotenv = ">=0.20,<0.22"
 pytz = ">=2022.2.1,<2023.0.0"
 PyYAML = ">=6.0,<7.0"
@@ -1409,6 +1407,10 @@ typing-extensions = ">=4.2.0,<5.0.0"
 docs = ["furo (>=2022.12.7,<2023.0.0)", "myst-parser (>=0.17.2,<0.19.0)", "sphinx (>=4.5,<6.0)", "sphinx-autobuild (>=2021.3.14,<2022.0.0)", "sphinx-copybutton (>=0.3.1,<0.6.0)", "sphinx-reredirects (>=0.1.1,<0.2.0)"]
 s3 = ["fs-s3fs (>=1.1.1,<2.0.0)"]
 testing = ["pytest (>=7.2.1,<8.0.0)", "pytest-durations (>=1.2.0,<2.0.0)"]
+
+[package.source]
+type = "directory"
+url = "../../sdk"
 
 [[package]]
 name = "six"
@@ -1643,4 +1645,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "<3.12,>=3.8.1"
-content-hash = "b7b086b70c36c00d0490a2c64f6d3df3b0c4a3d09dd5d5f8f0f4c9834afdfdbf"
+content-hash = "eed2a4ffea3b94372e1f24d08e2881ed5bfe67f164f65bb2a6b3870ca2d0d1fe"
