@@ -36,7 +36,3 @@ def teardown_test_table(table_name, sqlalchemy_url):
     engine = sqlalchemy.create_engine(sqlalchemy_url)
     with engine.connect() as conn:
         conn.execute(f"DROP TABLE {table_name}")
-
-
-if __name__ == "__main__":
-    setup_test_table()

@@ -1,10 +1,14 @@
 import pendulum
 import pytest
-from singer_sdk.testing import get_tap_test_class, suites
+from singer_sdk.testing import get_tap_test_class
 from singer_sdk.testing.suites import TestSuite
 from singer_sdk.testing.templates import StreamTestTemplate
 
 from tap_postgres.tap import TapPostgres
+
+from .test_replication_key import setup_test_table, teardown_test_table
+
+SQLALCHEMY_URL = "postgresql://postgres:postgres@localhost:5432/postgres"
 
 TapPostgresTests = get_tap_test_class(
     tap_class=TapPostgres,
@@ -16,9 +20,11 @@ TapPostgresTests = get_tap_test_class(
 class TestTapPostgres(TapPostgresTests):
     """Standard Tap Tests."""
 
-    @pytest.fixture
-    def resource(self, fake_data):
+    @pytest.fixture(scope="class")
+    def resource(self):
+        setup_test_table(table_name="test_full_table", sqlalchemy_url=SQLALCHEMY_URL)
         yield
+        teardown_test_table(table_name="test_full_table", sqlalchemy_url=SQLALCHEMY_URL)
 
 
 class StreamReplicationKeyTest(StreamTestTemplate):
@@ -61,6 +67,12 @@ TapPostgresIncremental = get_tap_test_class(
 class TestTapPostgresIncremental(TapPostgresIncremental):
     """Incremental Test."""
 
-    @pytest.fixture
-    def resource(self, fake_data):
+    @pytest.fixture(scope="class")
+    def resource(self):
+        setup_test_table(
+            table_name="test_replication_key", sqlalchemy_url=SQLALCHEMY_URL
+        )
         yield
+        teardown_test_table(
+            table_name="test_replication_key", sqlalchemy_url=SQLALCHEMY_URL
+        )
