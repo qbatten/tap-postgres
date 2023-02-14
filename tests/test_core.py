@@ -28,21 +28,22 @@ class StreamReplicationKeyTest(StreamTestTemplate):
         if self.stream.replication_key:
             # test that data starts from bookmark
             bookmark_value = self.stream.stream_state.get("replication_key_value")
+            starting_bookmark_dt = pendulum.parse(bookmark_value)
             first_record_updated_at_dt = pendulum.parse(
                 self.stream_records[0]["updated_at"]
             )
-            starting_bookmark_dt = pendulum.parse(bookmark_value)
             assert first_record_updated_at_dt >= starting_bookmark_dt
+
             # test that final STATE message writes correct bookmark
             new_bookmark = self.runner.state_messages[-1]["value"]["bookmarks"][
                 "public-test_replication_key"
             ]["replication_key_value"]
-            last_record_updated_at = self.stream_records[-1]["updated_at"]
             new_bookmark_dt = pendulum.parse(new_bookmark)
+            last_record_updated_at = self.stream_records[-1]["updated_at"]
             assert new_bookmark == last_record_updated_at
             assert new_bookmark_dt <= pendulum.parse(
                 "2022-11-30T00:00:00+00:00"
-            )  # last possible record in fake data
+            )  # last possible record updated_at in fake data
 
 
 custom_suite = TestSuite(kind="tap_stream", tests=[StreamReplicationKeyTest])
